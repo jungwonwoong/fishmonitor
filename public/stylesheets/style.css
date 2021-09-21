@@ -4,5 +4,31 @@ body {
 }
 
 a {
-  color: #00B7FF;
+  color: rgb(157, 255, 0);
 }
+
+#video {
+  width: 960px;
+  height: 540px;
+  border: 1px solid red;
+}
+
+#onoff {
+  width: 60px;
+  height: 30px;
+  border: 1px solid green;
+  font-size: 2em;
+  text-align: center;
+}
+
+#myDiv {
+  width: 960px;
+  height: 540px;
+  border: 1px solid green;
+}
+ #timeshow {
+   width: 550px;
+   border: 1px solid blue;
+   font-size: 2em;
+   text-align: center;
+ }

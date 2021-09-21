@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('fishmonitor:server');
+var debug = require('debug')('cctv:server');
 var http = require('http');
 
 /**
@@ -20,7 +20,39 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+const io = require('socket.io')(server);
+const Datastore = require('nedb');
+const db = new Datastore({ filename: `db/${Date.now()}.db`, autoload: true });
 
+io.of('/video').on('connection', (socket) => {
+  socket.on('videocamera', (image) => {
+    var frame = Buffer.from(image, 'base64').toString();
+    io.of('/user').emit('video', frame)
+  })
+  socket.on('posdata', (data) => {
+    //console.log('xpos: ' + data.x + ', ' + 'ypos: ' + data.y)
+    db.insert({_id: Date.now(), x: data.x, y: data.y})
+  })
+})
+io.of('/user').on('connection', (socket) => {
+  console.log('클라이언트와 연결됨');
+  socket.emit('test', '클라이언트 반갑다');
+  const db1 = new Datastore('db/1612403106767.db');
+  db1.loadDatabase();
+  db1.find({}, (err, docs) => {
+    //docs.forEach((el) => {
+    //let data = new Date(el.data);
+    socket.emit('position', docs)
+    //console.log("x: "+el.x+" y: "+ el.y)
+    // console.log("20/" + (convertDate.getMonth()+1) + "/" + convertDate.getDate() + "), 시간(" + convertDate.getHours() + ":" + convertDate.getMinutes() + ":" + convertDate.getSeconds())
+    //})
+
+  })
+  socket.on('vOnOff', (data) => {   
+    console.log(data)
+      io.of('/video').emit('stopvideo', data)
+  })
+})
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -28,6 +60,7 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
 
 /**
  * Normalize a port into a number, string, or false.
